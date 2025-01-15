@@ -5,7 +5,7 @@ CFLAGS = -c -g -fno-pie        # C compiler flags (compile only, debugging symbo
 LDFLAGS = -no-pie -g           # Linker flags (no position-independent code, debugging symbols)
 
 # Source files
-ASM_SRC = routine.asm          # Assembly source file
+ASM_SRC = routine.s          # Assembly source file
 C_SRC = main.c                 # C source file
 
 # Object files
