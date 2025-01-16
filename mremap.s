@@ -1,5 +1,14 @@
 .intel_syntax noprefix
 
+.section .data
+
+    msg1:               .ascii "Part 1 of the message, "   # Message
+    msg1_len = $ - msg1   # Calculate length of the message
+
+    msg2:               .asciz "Part 1 of the message."   # Message
+    msg2_len = $ - msg2   # Calculate length of the message
+
+
 .section .text
     .globl _start
 
@@ -23,10 +32,16 @@ _start:
     mov rax, 9            # Syscall number for mmap
     syscall               # Invoke syscall
 
-    int3
+    #int3
     # Check if mmap succeeded (returns address in rax)
     test rax, rax
     js mmap_failed        # Jump to mmap_failed if rax is negative (error)
+
+    # Write msg1 at the address returned by mmap
+    lea rdi, [rax]        # Load allocated memory address into rdi
+    lea rsi, [msg1]       # Load msg1 address into rsi
+    mov rcx, msg1_len     # Move the length of msg1 into rcx
+    rep movsb             # Copy msg1 to the allocated memory
 
     # mmap succeeded, rax contains the allocated memory address
 
@@ -44,10 +59,31 @@ _start:
     mov rax, 25           # Syscall number for mremap
     syscall               # Invoke syscall
 
-    int3
+    #int3s
     # Check if mremap succeeded
     test rax, rax
     js mmap_failed        # Jump to mmap_failed if rax is negative (error)
+
+
+    # Write msg2 at the new address after mremap
+    lea rdi, [rax + msg1_len]        # Load new memory address (after msg1) into rdi
+    lea rsi, [msg2]       # Load msg2 address into rsi
+    mov rcx, msg2_len     # Move the length of msg2 into rcx
+    rep movsb             # Copy msg2 to the new memory address
+
+    #int3
+
+    mov rsi, rax    # Load message
+    mov rax, 1      # SYS Write
+    mov rdi, 1                          # File descriptor for stdout
+    mov rcx, msg2_len
+    mov rdx, msg1_len  # Load error message length
+    add rdx, rcx                        # Set exit code 1 for error
+    syscall                             # Trigger syscall for writing error message
+
+    mov rax, 60                         # Exit syscall number
+    mov rdi, 0                          # Status code for correct!
+    syscall                             # Exit the program
 
     # If we reach here, mremap succeeded
     # Exit the program (exit code 0)
