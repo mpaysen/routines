@@ -33,3 +33,6 @@ $(EXEC): $(ASM_OBJ) $(C_OBJ)    # If any object file changes
 # Clean rule
 clean:                          # The clean target is used to remove generated files
 	rm -f $(ASM_OBJ) $(C_OBJ) $(EXEC)  # Remove the object files and executable
+
+# as -o mremap.o mremap.s  -g
+# ld -g -o mremap mremap.o
